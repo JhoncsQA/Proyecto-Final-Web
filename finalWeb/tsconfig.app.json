@@ -1,0 +1,13 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",  // Extiende la configuración base de Vue.
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],  // Incluir todos los archivos TypeScript y Vue.
+  "exclude": ["src/**/__tests__/*"],  // Excluir pruebas de la compilación.
+  "compilerOptions": {
+    "composite": true,  // Habilitar la creación de proyectos compuestos, lo que permite trabajar en varios proyectos TypeScript a la vez.
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",  // Establecer el archivo donde se almacenará la información de compilación incremental.
+    "baseUrl": ".",  // Establecer la raíz para las resoluciones de módulos (baseUrl en proyectos monolíticos).
+    "paths": {
+      "@/*": ["./src/*"]  // Alias para resolver módulos con el prefijo "@" hacia el directorio "src".
+    }
+  }
+}
