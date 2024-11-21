@@ -30,7 +30,6 @@ export default defineComponent({
       if (success) {
         alert('Inicio de sesión exitoso');
       } else {
-        authStore.logout
         alert('Credenciales incorrectas');
         
       }

@@ -25,12 +25,9 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('loggedIn', 'true'); // Persistir estado
         return true;
       } else {
+        localStorage.setItem('loggedIn', 'false');
         return false;
       }
     },
-    logout(): void {
-      this.loggedIn = false;
-      localStorage.setItem('loggedIn', 'false'); // Persistir estado
-    }
   }
 });
