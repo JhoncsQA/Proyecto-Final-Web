@@ -1,17 +1,18 @@
 <template>
   <div class="inventory">
-    <h1>Inventario Papelería</h1>
+    <h1>Inventario de Papelería</h1>
 
     <!-- Formulario para agregar producto -->
     <div class="product-form">
       <h2>Agregar Producto</h2>
-      <label for="product-name">Nombre del producto</label>
+      <label for="product-name">Nombre del Producto</label>
       <input 
         id="product-name" 
         v-model="newProduct.name" 
         type="text" 
         placeholder="Nombre del producto" 
-        name="product-name" 
+        name="product-name"
+        required 
       />
       
       <label for="product-price">Precio</label>
@@ -21,6 +22,7 @@
         type="number" 
         placeholder="Precio" 
         name="product-price" 
+        required 
       />
       
       <label for="product-quantity">Cantidad</label>
@@ -30,9 +32,10 @@
         type="number" 
         placeholder="Cantidad" 
         name="product-quantity" 
+        required 
       />
       
-      <button @click="addProduct">Agregar</button>
+      <button @click="addProduct" class="btn primary">Agregar</button>
     </div>
 
     <!-- Listar productos -->
@@ -51,12 +54,12 @@
         <tr v-for="product in products" :key="product.id">
           <td>{{ product.id }}</td>
           <td>{{ product.name }}</td>
-          <td>{{ product.price }}</td>
+          <td>{{ product.price  }}</td>
           <td>{{ product.quantity }}</td>
           <td>
-            <button @click="startEditing(product)">Editar</button>
-            <button @click="deleteProduct(product.id)">Eliminar</button>
-            <button @click="startSale(product)">Vender</button>
+            <button @click="startEditing(product)" class="btn secondary">Editar</button>
+            <button @click="deleteProduct(product.id)" class="btn danger">Eliminar</button>
+            <button @click="startSale(product)" class="btn primary">Vender</button>
           </td>
         </tr>
       </tbody>
@@ -68,7 +71,7 @@
       <input v-model="editProduct.name" placeholder="Nombre del producto" />
       <input v-model.number="editProduct.price" type="number" placeholder="Precio" />
       <input v-model.number="editProduct.quantity" type="number" placeholder="Cantidad" />
-      <button @click="saveEdit">Guardar Cambios</button>
+      <button @click="saveEdit" class="btn primary">Guardar Cambios</button>
     </div>
 
     <!-- Formulario para venta -->
@@ -76,7 +79,7 @@
       <h2>Realizar Venta</h2>
       <p>Producto: {{ saleProduct.name }}</p>
       <input v-model.number="saleQuantity" type="number" placeholder="Cantidad a vender" min="1" />
-      <button @click="processSale">Vender</button>
+      <button @click="processSale" class="btn primary">Vender</button>
     </div>
 
     <!-- Historial de ventas -->
@@ -185,6 +188,14 @@ export default {
       }
     };
 
+    // Función para formatear los precios
+    const formatCurrency = (value: number) => {
+      return new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR', // Puedes cambiar la moneda si lo deseas
+      }).format(value);
+    };
+
     onMounted(() => {
       loadProducts(); // Cargar los productos al inicio
       loadSalesHistory(); // Cargar el historial de ventas
@@ -202,49 +213,140 @@ export default {
       saveEdit,
       deleteProduct,
       startSale,
-      processSale
+      processSale,
+      formatCurrency // Exponer el método para usarlo en el template
     };
   }
 };
 </script>
 
+
 <style scoped>
-  .inventory {
-    margin: 20px;
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    
   }
 
-  .product-form {
+  
+
+  .inventory {
+    margin: 30px auto;
+    max-width: 1200px;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  h1, h2 {
+    color: #333;
+    font-weight: 600;
     margin-bottom: 20px;
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+  .product-form {
+    margin-bottom: 30px;
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
   }
 
-  table th, table td {
-    padding: 8px;
-    text-align: left;
-    border: 1px solid #ddd;
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 15px;
   }
 
   .product-form input {
-    margin-right: 10px;
-    padding: 8px;
-    width: 200px;
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    border-radius: 6px;
+    border: 1px solid #d0d0d0;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
   }
 
-  button {
-    padding: 8px 16px;
+  .product-form input:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+  }
+
+  .btn {
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 6px;
     cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn.primary {
     background-color: #007BFF;
     color: white;
     border: none;
   }
 
-  button:hover {
-    background-color: #007BFF;
+  .btn.primary:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+  }
+
+  .btn.secondary {
+    background-color: #28a745;
+    color: white;
+    border: none;
+  }
+
+  .btn.secondary:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+  }
+
+  .btn.danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+  }
+
+  .btn.danger:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  table th, table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+  }
+
+  table th {
+    background-color: #f2f2f2;
+    color: #333;
+    font-weight: bold;
+  }
+
+  table td {
+    color: #555;
+  }
+
+  table tr:hover {
+    background-color: #f7f7f7;
   }
 
   ul {
@@ -253,8 +355,30 @@ export default {
   }
 
   ul li {
-    padding: 8px;
-    background-color: #f9f9f9;
-    margin-bottom: 5px;
+    padding: 10px;
+    background-color: #fff;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    border: 1px solid #e0e0e0;
+  }
+
+  @media (max-width: 768px) {
+    .inventory {
+      margin: 20px;
+      padding: 20px;
+    }
+
+    .product-form {
+      padding: 20px;
+    }
+
+    table {
+      font-size: 12px;
+    }
+
+    table th, table td {
+      padding: 10px;
+    }
   }
 </style>

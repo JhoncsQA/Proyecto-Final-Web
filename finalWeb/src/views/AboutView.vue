@@ -5,43 +5,56 @@
     <!-- Formulario para agregar o editar cliente -->
     <div class="client-form">
       <h2>{{ editClient ? 'Editar Cliente' : 'Registrar Cliente' }}</h2>
-      <label for="client-name">Nombre</label>
-      <input 
-        id="client-name" 
-        v-model="newClient.name" 
-        type="text" 
-        placeholder="Nombre completo" 
-        name="client-name" 
-      />
       
-      <label for="client-email">Correo electrónico</label>
-      <input 
-        id="client-email" 
-        v-model="newClient.email" 
-        type="email" 
-        placeholder="Correo electrónico" 
-        name="client-email" 
-      />
-      
-      <label for="client-phone">Teléfono</label>
-      <input 
-        id="client-phone" 
-        v-model="newClient.phone" 
-        type="text" 
-        placeholder="Teléfono" 
-        name="client-phone" 
-      />
-      
-      <label for="client-address">Dirección</label>
-      <input 
-        id="client-address" 
-        v-model="newClient.address" 
-        type="text" 
-        placeholder="Dirección" 
-        name="client-address" 
-      />
-      
-      <button @click="saveClient">{{ editClient ? 'Guardar Cambios' : 'Registrar Cliente' }}</button>
+      <form @submit.prevent="saveClient">
+        <div class="form-group">
+          <label for="client-name">Nombre</label>
+          <input 
+            id="client-name" 
+            v-model="newClient.name" 
+            type="text" 
+            placeholder="Nombre completo" 
+            required 
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="client-email">Correo electrónico</label>
+          <input 
+            id="client-email" 
+            v-model="newClient.email" 
+            type="email" 
+            placeholder="Correo electrónico" 
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="client-phone">Teléfono</label>
+          <input 
+            id="client-phone" 
+            v-model="newClient.phone" 
+            type="text" 
+            placeholder="Teléfono" 
+            required 
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="client-address">Dirección</label>
+          <input 
+            id="client-address" 
+            v-model="newClient.address" 
+            type="text" 
+            placeholder="Dirección" 
+            required 
+          />
+        </div>
+
+        <button type="submit" class="btn-primary">
+          {{ editClient ? 'Guardar Cambios' : 'Registrar Cliente' }}
+        </button>
+      </form>
     </div>
 
     <!-- Listar clientes -->
@@ -65,8 +78,8 @@
           <td>{{ client.phone }}</td>
           <td>{{ client.address }}</td>
           <td>
-            <button @click="startEditing(client)">Editar</button>
-            <button @click="deleteClient(client.id)">Eliminar</button>
+            <button @click="startEditing(client)" class="btn-secondary">Editar</button>
+            <button @click="deleteClient(client.id)" class="btn-danger">Eliminar</button>
           </td>
         </tr>
       </tbody>
@@ -151,40 +164,136 @@ export default {
 
 <style scoped>
   .clientes {
-    margin: 20px;
+    margin: 30px auto;
+    max-width: 1200px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   }
 
+  h1 {
+    text-align: center;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 30px;
+  }
+  
+
   .client-form {
+    margin-bottom: 30px;
+    padding: 25px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .client-form h2 {
+    margin-bottom: 15px;
+    color: #333;
+  }
+
+  .form-group {
     margin-bottom: 20px;
   }
 
-  table {
+  .form-group label {
+    font-size: 14px;
+    color: #555;
+  }
+
+  .form-group input {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
-
-  table th, table td {
-    padding: 8px;
-    text-align: left;
+    padding: 12px 15px;
+    margin-top: 5px;
     border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
   }
 
-  .client-form input {
-    margin-right: 10px;
-    padding: 8px;
-    width: 250px;
+  .form-group input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
   }
 
   button {
-    padding: 8px 16px;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 6px;
     cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
     background-color: #007BFF;
     color: white;
     border: none;
   }
 
-  button:hover {
-    background-color: #007BFF;
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+
+  .btn-secondary {
+    background-color: #28a745;
+    color: white;
+    border: none;
+  }
+
+  .btn-secondary:hover {
+    background-color: #218838;
+  }
+
+  .btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+  }
+
+  .btn-danger:hover {
+    background-color: #c82333;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+  }
+
+  table th, table td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ffffff;
+    font-size: 14px;
+  }
+
+  table th {
+    background-color: #f7f7f7;
+    color: #333;
+  }
+
+  table td {
+    color: #555;
+  }
+
+  table tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  @media (max-width: 768px) {
+    .clientes {
+      margin: 20px;
+      padding: 15px;
+    }
+
+    .client-form {
+      padding: 20px;
+    }
+
+    table th, table td {
+      font-size: 12px;
+    }
   }
 </style>
