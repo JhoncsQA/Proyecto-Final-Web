@@ -54,7 +54,7 @@
         <tr v-for="product in products" :key="product.id">
           <td>{{ product.id }}</td>
           <td>{{ product.name }}</td>
-          <td>{{ product.price  }}</td>
+          <td>{{ product.price }}</td>
           <td>{{ product.quantity }}</td>
           <td>
             <button @click="startEditing(product)" class="btn secondary">Editar</button>
@@ -84,142 +84,118 @@
 
     <!-- Historial de ventas -->
     <h2>Historial de Ventas</h2>
-    <ul>
-      <li v-for="(sale, index) in salesHistory" :key="index">{{ sale }}</li>
-    </ul>
+    <table v-if="salesHistory.length > 0">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Mostrar detalles de cada venta -->
+        <tr v-for="(sale, index) in salesHistory" :key="index">
+          <td>{{ sale.product }}</td>
+          <td>{{ sale.quantity }}</td>
+          <td>{{ sale.total | currency }}</td> <!-- Filtro de formato de moneda -->
+        </tr>
+      </tbody>
+    </table>
+    <p v-else>No hay ventas registradas.</p>
+
+    <!-- Total de ventas -->
+    <h2>Total de Ventas: {{ totalSales | currency }}</h2>
   </div>
 </template>
 
-<script lang="ts">
-import { ref, onMounted } from 'vue';
-
+<script>
 export default {
-  setup() {
-    const products = ref<any[]>([]);
-    const newProduct = ref({ name: '', price: 0, quantity: 0 });
-    const editProduct = ref<any | null>(null);
-    const saleProduct = ref<any | null>(null); // Producto seleccionado para venta
-    const saleQuantity = ref(1); // Cantidad que se va a vender
-    const salesHistory = ref<string[]>([]); // Historial de ventas
-
-    // Cargar productos desde localStorage (simula un archivo JSON)
-    const loadProducts = () => {
-      const storedProducts = localStorage.getItem('products');
-      if (storedProducts) {
-        products.value = JSON.parse(storedProducts);
+  data() {
+    return {
+      newProduct: {
+        name: '',
+        price: 0,
+        quantity: 0
+      },
+      products: [],
+      editProduct: null,
+      saleProduct: null,
+      saleQuantity: 1,
+      salesHistory: [], // Este es el historial de ventas
+    };
+  },
+  computed: {
+    // Calculamos el total de ventas
+    totalSales() {
+      return this.salesHistory.reduce((total, sale) => {
+        return total + sale.total;
+      }, 0);
+    }
+  },
+  methods: {
+    addProduct() {
+      if (this.newProduct.name && this.newProduct.price > 0 && this.newProduct.quantity > 0) {
+        this.products.push({
+          id: this.products.length + 1,
+          ...this.newProduct
+        });
+        this.newProduct.name = '';
+        this.newProduct.price = 0;
+        this.newProduct.quantity = 0;
       }
-    };
-
-    // Cargar historial de ventas desde localStorage
-    const loadSalesHistory = () => {
-      const storedSalesHistory = localStorage.getItem('salesHistory');
-      if (storedSalesHistory) {
-        salesHistory.value = JSON.parse(storedSalesHistory);
-      }
-    };
-
-    // Guardar productos en localStorage
-    const saveProducts = () => {
-      localStorage.setItem('products', JSON.stringify(products.value));
-    };
-
-    // Guardar historial de ventas en localStorage
-    const saveSalesHistory = () => {
-      localStorage.setItem('salesHistory', JSON.stringify(salesHistory.value));
-    };
-
-    // Agregar un producto
-    const addProduct = () => {
-      const newId = products.value.length > 0 ? products.value[products.value.length - 1].id + 1 : 1;
-      const product = { ...newProduct.value, id: newId };
-      products.value.push(product);
-      saveProducts(); // Guardar después de agregar
-      newProduct.value = { name: '', price: 0, quantity: 0 }; // Limpiar el formulario
-    };
-
-    // Editar un producto
-    const startEditing = (product: any) => {
-      editProduct.value = { ...product }; // Clonar el producto
-    };
-
-    const saveEdit = () => {
-      const index = products.value.findIndex(p => p.id === editProduct.value.id);
+    },
+    startEditing(product) {
+      this.editProduct = { ...product };
+    },
+    saveEdit() {
+      const index = this.products.findIndex(p => p.id === this.editProduct.id);
       if (index !== -1) {
-        products.value[index] = { ...editProduct.value };
-        saveProducts(); // Guardar después de editar
-        editProduct.value = null; // Limpiar el formulario
+        this.products.splice(index, 1, this.editProduct);
       }
-    };
+      this.editProduct = null;
+    },
+    deleteProduct(id) {
+      this.products = this.products.filter(product => product.id !== id);
+    },
+    startSale(product) {
+      if (product.quantity > 0) {
+        this.saleProduct = { ...product };
+      } else {
+        alert('No hay suficiente cantidad para vender');
+      }
+    },
+    processSale() {
+      if (this.saleQuantity > 0 && this.saleQuantity <= this.saleProduct.quantity) {
+        // Descontar la cantidad vendida del inventario
+        this.saleProduct.quantity -= this.saleQuantity;
 
-    // Eliminar un producto
-    const deleteProduct = (id: number) => {
-      products.value = products.value.filter(product => product.id !== id);
-      saveProducts(); // Guardar después de eliminar
-    };
-
-    // Iniciar la venta de un producto
-    const startSale = (product: any) => {
-      saleProduct.value = { ...product }; // Clonar el producto
-    };
-
-    // Procesar la venta
-    const processSale = () => {
-      if (saleProduct.value.quantity >= saleQuantity.value) {
-        // Descontar la cantidad del inventario
-        saleProduct.value.quantity -= saleQuantity.value;
-
-        // Actualizar el producto en el inventario
-        const index = products.value.findIndex(p => p.id === saleProduct.value.id);
-        if (index !== -1) {
-          products.value[index] = { ...saleProduct.value };
-          saveProducts(); // Guardar después de realizar la venta
-        }
-
-        // Agregar al historial de ventas
-        const saleEntry = `Venta de ${saleQuantity.value} unidades de "${saleProduct.value.name}" por $${saleProduct.value.price * saleQuantity.value}`;
-        salesHistory.value.push(saleEntry);
-        saveSalesHistory(); // Guardar historial de ventas
+        // Agregar la venta al historial
+        const sale = {
+          product: this.saleProduct.name,
+          quantity: this.saleQuantity,
+          total: this.saleProduct.price * this.saleQuantity
+        };
+        this.salesHistory.push(sale);
 
         // Limpiar el formulario de venta
-        saleProduct.value = null;
-        saleQuantity.value = 1; // Restablecer la cantidad
+        this.saleProduct = null;
+        this.saleQuantity = 1;
       } else {
-        alert('No hay suficiente stock para esta venta.');
+        alert('Cantidad no válida para la venta');
       }
-    };
-
-    // Función para formatear los precios
-    const formatCurrency = (value: number) => {
+    }
+  },
+  filters: {
+    // Filtro para mostrar el valor en formato de moneda
+    currency(value) {
       return new Intl.NumberFormat('es-ES', {
         style: 'currency',
-        currency: 'EUR', // Puedes cambiar la moneda si lo deseas
+        currency: 'EUR'
       }).format(value);
-    };
-
-    onMounted(() => {
-      loadProducts(); // Cargar los productos al inicio
-      loadSalesHistory(); // Cargar el historial de ventas
-    });
-
-    return {
-      products,
-      newProduct,
-      editProduct,
-      saleProduct,
-      saleQuantity,
-      salesHistory,
-      addProduct,
-      startEditing,
-      saveEdit,
-      deleteProduct,
-      startSale,
-      processSale,
-      formatCurrency // Exponer el método para usarlo en el template
-    };
+    }
   }
 };
 </script>
-
 
 <style scoped>
   * {
