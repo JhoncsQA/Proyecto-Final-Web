@@ -117,11 +117,11 @@ export default {
         price: 0,
         quantity: 0
       },
-      products: [],
+      products: this.loadProducts(),  // Cargar productos desde localStorage
       editProduct: null,
       saleProduct: null,
       saleQuantity: 1,
-      salesHistory: [], // Este es el historial de ventas
+      salesHistory: this.loadSalesHistory(), // Cargar historial de ventas desde localStorage
     };
   },
   computed: {
@@ -135,13 +135,13 @@ export default {
   methods: {
     addProduct() {
       if (this.newProduct.name && this.newProduct.price > 0 && this.newProduct.quantity > 0) {
-        this.products.push({
+        const newProduct = {
           id: this.products.length + 1,
           ...this.newProduct
-        });
-        this.newProduct.name = '';
-        this.newProduct.price = 0;
-        this.newProduct.quantity = 0;
+        };
+        this.products.push(newProduct);
+        this.saveProducts();  // Guardar los productos actualizados en localStorage
+        this.newProduct = { name: '', price: 0, quantity: 0 };
       }
     },
     startEditing(product) {
@@ -151,11 +151,13 @@ export default {
       const index = this.products.findIndex(p => p.id === this.editProduct.id);
       if (index !== -1) {
         this.products.splice(index, 1, this.editProduct);
+        this.saveProducts();  // Guardar los productos actualizados
       }
       this.editProduct = null;
     },
     deleteProduct(id) {
       this.products = this.products.filter(product => product.id !== id);
+      this.saveProducts();  // Guardar los productos actualizados
     },
     startSale(product) {
       if (product.quantity > 0) {
@@ -177,12 +179,33 @@ export default {
         };
         this.salesHistory.push(sale);
 
+        // Guardar el historial de ventas en localStorage
+        this.saveSalesHistory();
+
         // Limpiar el formulario de venta
         this.saleProduct = null;
         this.saleQuantity = 1;
       } else {
         alert('Cantidad no válida para la venta');
       }
+    },
+    // Guardar productos en localStorage
+    saveProducts() {
+      localStorage.setItem('products', JSON.stringify(this.products));
+    },
+    // Cargar productos desde localStorage
+    loadProducts() {
+      const products = localStorage.getItem('products');
+      return products ? JSON.parse(products) : [];
+    },
+    // Guardar historial de ventas en localStorage
+    saveSalesHistory() {
+      localStorage.setItem('salesHistory', JSON.stringify(this.salesHistory));
+    },
+    // Cargar historial de ventas desde localStorage
+    loadSalesHistory() {
+      const salesHistory = localStorage.getItem('salesHistory');
+      return salesHistory ? JSON.parse(salesHistory) : [];
     }
   },
   filters: {
